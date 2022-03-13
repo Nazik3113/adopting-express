@@ -1,0 +1,22 @@
+{
+    "apps": [
+        {
+            "name": "native_clusterise",
+            "script": "native_clusterise.js",
+            "instances": 1
+        },
+        {
+            "name": "pm2_clusterise",
+            "script": "pm2_clusterise.js",
+            "instances": 5
+        },
+        {
+            "name": "zero_down_time",
+            "script": "zero_down_time.js",
+            "instances": 5
+        }
+    ]
+}
+
+// pm2 start pm2.config.json
+// delete before use
