@@ -1,4 +1,7 @@
 import express from "express";
+import path from "path";
+import formidable from "formidable";
+import fs from "fs-extra";
 
 const port = process.env.PORT || 3000;
 
@@ -86,6 +89,55 @@ app.get("/error", (req, res) => {
 app.use((err, req, res, next) => {
     console.log(err);
     res.sendStatus(500);
+});
+
+const static_options = {
+    extensions: ['htm', 'html'],
+    setHeaders: (res, path, stat) => {
+        res.set('X-Date', new Date());
+        res.set('X-File-Size', `${stat.size} bytes`);
+    }
+};
+
+const static_dir = path.join(path.resolve(), "../", "public");
+const upload_dir = path.join(path.resolve(), "../", "data");
+
+app.use("/static", express.static(static_dir, static_options));
+
+app.post("/upload", async (req, res) => {
+    const form = new formidable.IncomingForm();
+
+    await fs.ensureDir(upload_dir);
+
+    form.uploadDir = upload_dir;
+    
+    form.on("fileBegin", (name, file) => {
+        const fileName = file.originalFilename.toLowerCase().replace(/\s+|_+/g, "-");
+        file.path = `${form.uploadDir}/${fileName}`;
+    });
+
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            res.writeHead(413), {'content-type': 'text/plain'};
+            return res.end(`${err.name}: ${err.message}\n\n`);
+        }
+
+        res.sendStatus(204);
+    });
+});
+
+const header1 = (req, res, next) => {
+    res.header("X-HEADER-1", "first");
+    next();
+};
+
+const header2 = (req, res, next) => {
+    res.header("X-HEADER-2", "second");
+    next();
+};
+
+app.get("/headers", [header1, header2], (req, res) => {
+    res.sendStatus(200);
 });
 
 app.listen(port);
