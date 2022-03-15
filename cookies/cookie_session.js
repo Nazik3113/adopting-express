@@ -1,18 +1,16 @@
 import express from "express";
-import session, { MemoryStore } from "express-session";
+import cookieSession from "cookie-session";
 
 const app = express();
 
 const sessionOptions = {
-    key: "user",
-    secret: "pa$$word",
-    resave: false, // disable session save
-    rolling: true, // reset maxAge on every query
-    saveUninitialized: false, // disable save cookie before initialize 
-    // storage: new MemoryStore(),
+    name: "session",
+    keys: ["key1", "key2"],
     cookie: {
         httpOnly: true,
-        maxAge: 15 * 60 * 1000 // 15 minutes
+        maxAge: 15 * 60 * 1000, // 15 minutes
+        domain: "localhost:3000",
+        path: "/users"
     }
 };
 
@@ -21,7 +19,7 @@ if (process.env.NODE_ENV == "production") {
 }
 
 app.use(express.json());
-app.use(session(sessionOptions));
+app.use(cookieSession(sessionOptions));
 
 app.get("/", (req, res) => {
     const { name } = req.query;
