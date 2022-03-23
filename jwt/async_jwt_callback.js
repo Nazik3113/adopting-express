@@ -18,8 +18,6 @@ jwt.sign({name: "John"}, pass, options, (error, token) => { // async method
         console.log(json);
     });
 
-    
-
     setTimeout(() => {
         try {
             jwt.verify(token, pass, (error, json) => {
